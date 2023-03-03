@@ -1,5 +1,6 @@
-use linfa_linalg::qr::QR;
+// use linfa_linalg::qr::QR;
 use ndarray::{Array2, array};
+use ndarray_linalg::QR;
 
 fn main(){
     let x:Array2<f64> = array![
@@ -10,12 +11,14 @@ fn main(){
         [0.3,0.4,0.2,0.1,0.0],
     ];
 
-    let a = x.qr().unwrap();
-    dbg!(&a);
-    let q = &a.generate_q();
-    let r = a.into_r();
+    let (q,r) = x.qr().unwrap();
     dbg!(&q);
     dbg!(&r);
+
+    // let q = &a.generate_q();
+    // let r = a.into_r();
+    // dbg!(&q);
+    // dbg!(&r);
     dbg!(q.dot(&r));
 
 }

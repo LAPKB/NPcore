@@ -1,7 +1,6 @@
 use std::error;
-
-use linfa_linalg::{cholesky::{Cholesky}, triangular::{SolveTriangular}};
 use ndarray::{ArrayBase, Dim, OwnedRepr, Array, Array2, array};
+use ndarray_linalg::{Cholesky, Solve};
 use ndarray_stats::{QuantileExt, DeviationExt};
 type OneDimArray = ArrayBase<OwnedRepr<f64>, ndarray::Dim<[usize; 1]>>;
 
@@ -47,17 +46,19 @@ pub fn burke(psi: &ArrayBase<OwnedRepr<f64>,Dim<[usize; 2]>>) -> Result<(OneDimA
             psi.dot(&Array2::from_diag(&inner))
                 .dot(&psi.t()) + 
                 Array2::from_diag(&w_plam);        
-        let uph = h.cholesky()?;
+        let uph = h.cholesky(ndarray_linalg::UPLO::Lower)?;
         let uph = uph.t();
         let smuyinv = smu*(&ecol/&y);
         let rhsdw = &erow/&w - (psi.dot(&smuyinv));
-        let a = rhsdw.clone().into_shape((rhsdw.len(),1))?;
+        let a = rhsdw.clone().into_shape(rhsdw.len())?;
         //todo: cleanup this aux variable
         // //dbg!(uph.t().is_triangular(linfa_linalg::triangular::UPLO::Upper));
         // uph.solve_into(rhsdw);
-        let x = uph.t().solve_triangular(&a, linfa_linalg::triangular::UPLO::Lower)?;
-        let dw_aux = uph.solve_triangular(&x, linfa_linalg::triangular::UPLO::Upper)?;
-        let dw = dw_aux.column(0);
+        let x = uph.t().solve(&a).unwrap();
+        // let x = uph.t().solve_triangular(&a, ndarray_linalg::UPLO::Lower)?;
+        let dw = uph.solve(&x).unwrap();
+        // let dw_aux = uph.solve_triangular(&x, ndarray_linalg::UPLO::Upper)?;
+        // let dw = dw_aux.column(0);
         let dy = - psi.t().dot(&dw);
         let dlam = smuyinv - &lam - inner * &dy;
         let mut alfpri = -1. / ((&dlam/&lam).min().unwrap().min(-0.5));

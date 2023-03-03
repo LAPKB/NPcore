@@ -1,7 +1,8 @@
 use std::fs::{File, self};
 
 use csv::{ReaderBuilder, WriterBuilder};
-use linfa_linalg::qr::QR;
+// use linfa_linalg::qr::QR;
+use ndarray_linalg::QR;
 use ndarray::{stack, Axis, ArrayBase, ViewRepr, Dim, Array, OwnedRepr, Array1};
 use ndarray_stats::QuantileExt;
 use ndarray_csv::{Array2Reader, Array2Writer};
@@ -90,8 +91,7 @@ where
         // let perm = n_psi.sort_axis_by(Axis(1), |i, j| n_psi.column(i).sum() > n_psi.column(j).sum());
         // n_psi = n_psi.permute_axis(Axis(1), &perm);
         // // QR decomposition
-        // let qr =  n_psi.qr().unwrap();
-        // let r = qr.into_r();
+        // let (q,r) =  n_psi.qr().unwrap();
         // // Keep the valuable spp
         // let mut keep = 0;
         // //The minimum between the number of subjects and the actual number of support points
